@@ -323,6 +323,18 @@
 			clocks = <&osc24M>, <&pll6 1>, <&pll5 1>;
 			clock-output-names = "spi3";
 		};
+
+		dram_gates: clk@01c20100 {
+			#clock-cells = <1>;
+			compatible = "allwinner,sun4i-a10-dram-gates-clk";
+			reg = <0x01c20100 0x4>;
+			clocks = <&pll5 0>;
+			clock-output-names = "dram_ve", "dram_csi0",
+				"dram_csi1", "dram_ts", "dram_tvd",
+				"dram_tve0", "dram_tve1", "dram_out",
+				"dram_fe1", "dram_fe0", "dram_be0",
+				"dram_be1", "dram_de_mp", "dram_ace";
+		};
 	};
 
 	soc@01c00000 {
