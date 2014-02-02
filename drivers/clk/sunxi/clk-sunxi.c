@@ -1007,6 +1007,18 @@ static const struct gates_data sun5i_a13_usb_gates_data __initconst = {
 	.reset_mask = 0x03,
 };
 
+static const struct gates_data sun4i_a10_dram_gates_data __initconst = {
+	.mask = { 0x3F00807F },
+};
+
+static const struct gates_data sun5i_a13_dram_gates_data __initconst = {
+	.mask = { 0xA6000003 },
+};
+
+static const struct gates_data sun5i_a10s_dram_gates_data __initconst = {
+	.mask = { 0x8600002B },
+};
+
 static void __init sunxi_gates_clk_setup(struct device_node *node,
 					 struct gates_data *data)
 {
@@ -1302,6 +1314,9 @@ static const struct of_device_id clk_gates_match[] __initconst = {
 	{.compatible = "allwinner,sun6i-a31-apb2-gates-clk", .data = &sun6i_a31_apb2_gates_data,},
 	{.compatible = "allwinner,sun4i-a10-usb-clk", .data = &sun4i_a10_usb_gates_data,},
 	{.compatible = "allwinner,sun5i-a13-usb-clk", .data = &sun5i_a13_usb_gates_data,},
+	{.compatible = "allwinner,sun4i-a10-dram-gates-clk", .data = &sun4i_a10_dram_gates_data,},
+	{.compatible = "allwinner,sun5i-a10s-dram-gates-clk", .data = &sun5i_a10s_dram_gates_data,},
+	{.compatible = "allwinner,sun5i-a13-dram-gates-clk", .data = &sun5i_a13_dram_gates_data,},
 	{}
 };
 
