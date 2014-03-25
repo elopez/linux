@@ -1,0 +1,38 @@
+sudo: false
+language: c
+
+addons:
+  apt:
+    packages:
+    - bc
+    - gcc-arm-linux-gnueabihf
+    - u-boot-tools
+    - llvm-3.4-dev
+
+compiler:
+  - gcc
+
+env:
+  - ARCH=arm LOADADDR=0x40008000 CROSS_COMPILE="arm-linux-gnueabihf-" BUILD_CONFIG=sunxi_defconfig TARGETS="uImage dtbs" J=1 C=2
+  - ARCH=arm LOADADDR=0x40008000 CROSS_COMPILE="arm-linux-gnueabihf-" BUILD_CONFIG=multi_v7_defconfig TARGETS="uImage dtbs modules" J=1 C=2
+  - BUILD_CONFIG=allyesconfig TARGETS="bzImage" J=8 C=0
+  - BUILD_CONFIG=allnoconfig TARGETS="bzImage" J=8 C=0
+  - BUILD_CONFIG=allmodconfig TARGETS="bzImage modules" J=8 C=0
+
+install:
+  - export PATH="/usr/lib/llvm-3.4/bin:$HOME/bin:$PATH"
+  - sh -c '[ "$C" != "0" ] && wget http://codemonkey.org.uk/projects/git-snapshots/sparse/sparse-latest.tar.xz -O sparse-latest.tar.xz && tar -xJf sparse-latest.tar.xz && cd sparse-*/ && sed -i "s#PREFIX=.*#PREFIX=$HOME#" Makefile && make && make install || exit 0'
+
+before_script:
+  - ${CROSS_COMPILE}gcc -v
+  - make $BUILD_CONFIG
+
+script:
+  - make -j$J C=$C CONFIG_DEBUG_SECTION_MISMATCH=y $TARGETS
+
+notifications:
+  email:
+    recipients:
+      - travis@elopez.com.ar
+    on_success: change
+    on_failure: always
