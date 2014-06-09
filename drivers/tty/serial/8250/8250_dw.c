@@ -334,6 +334,10 @@ static int dw8250_probe_of(struct uart_port *p,
 	if (id >= 0)
 		p->line = id;
 
+	/* if dma is specified on the DT, try to use it */
+	if (of_get_property(np, "dmas", NULL))
+		up->dma = &data->dma;
+
 	/* clock got configured through clk api, all done */
 	if (p->uartclk)
 		return 0;
