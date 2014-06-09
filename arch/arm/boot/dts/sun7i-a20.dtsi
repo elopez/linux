@@ -935,6 +935,8 @@
 			reg-shift = <2>;
 			reg-io-width = <4>;
 			clocks = <&apb1_gates 16>;
+			dmas = <&dma 0 8>, <&dma 0 8>;
+			dma-names = "rx", "tx";
 			status = "disabled";
 		};
 
@@ -945,6 +947,8 @@
 			reg-shift = <2>;
 			reg-io-width = <4>;
 			clocks = <&apb1_gates 17>;
+			dmas = <&dma 0 9>, <&dma 0 9>;
+			dma-names = "rx", "tx";
 			status = "disabled";
 		};
 
@@ -955,6 +959,8 @@
 			reg-shift = <2>;
 			reg-io-width = <4>;
 			clocks = <&apb1_gates 18>;
+			dmas = <&dma 0 10>, <&dma 0 10>;
+			dma-names = "rx", "tx";
 			status = "disabled";
 		};
 
@@ -965,6 +971,8 @@
 			reg-shift = <2>;
 			reg-io-width = <4>;
 			clocks = <&apb1_gates 19>;
+			dmas = <&dma 0 11>, <&dma 0 11>;
+			dma-names = "rx", "tx";
 			status = "disabled";
 		};
 
@@ -975,6 +983,8 @@
 			reg-shift = <2>;
 			reg-io-width = <4>;
 			clocks = <&apb1_gates 20>;
+			dmas = <&dma 0 12>, <&dma 0 12>;
+			dma-names = "rx", "tx";
 			status = "disabled";
 		};
 
@@ -985,6 +995,8 @@
 			reg-shift = <2>;
 			reg-io-width = <4>;
 			clocks = <&apb1_gates 21>;
+			dmas = <&dma 0 13>, <&dma 0 13>;
+			dma-names = "rx", "tx";
 			status = "disabled";
 		};
 
@@ -995,6 +1007,8 @@
 			reg-shift = <2>;
 			reg-io-width = <4>;
 			clocks = <&apb1_gates 22>;
+			dmas = <&dma 0 14>, <&dma 0 14>;
+			dma-names = "rx", "tx";
 			status = "disabled";
 		};
 
@@ -1005,6 +1019,8 @@
 			reg-shift = <2>;
 			reg-io-width = <4>;
 			clocks = <&apb1_gates 23>;
+			dmas = <&dma 0 15>, <&dma 0 15>;
+			dma-names = "rx", "tx";
 			status = "disabled";
 		};
 
