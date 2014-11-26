@@ -1150,7 +1150,6 @@ static int sun4i_dma_probe(struct platform_device *pdev)
 	priv->slave.device_prep_dma_cyclic	= sun4i_dma_prep_dma_cyclic;
 	priv->slave.device_control		= sun4i_dma_control;
 	priv->slave.device_slave_caps 		= sun4i_dma_device_slave_caps;
-	priv->slave.chancnt			= DDMA_NR_MAX_VCHANS;
 	priv->slave.copy_align			= DMA_SLAVE_BUSWIDTH_4_BYTES;
 
 	priv->slave.dev = &pdev->dev;
