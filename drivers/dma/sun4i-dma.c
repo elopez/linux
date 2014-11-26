@@ -1020,9 +1020,9 @@ handle_pending:
 			 * whatever we have here, reusing the pchan. There's
 			 * no need to run the thread after this.
 			 *
-			 * For non-cyclic transfers we need to run the thread,
-			 * so it can program some more work, or notify
-			 * the client that the transfer has been completed.
+			 * For non-cyclic transfers we need to look around,
+			 * so we can program some more work, or notify the
+			 * client that their transfers have been completed.
 			 */
 			if (contract->is_cyclic) {
 				promise = get_next_cyclic_promise(contract);
