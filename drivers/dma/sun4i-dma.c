@@ -647,7 +647,7 @@ sun4i_dma_prep_dma_memcpy(struct dma_chan *chan, dma_addr_t dest,
 static struct dma_async_tx_descriptor *
 sun4i_dma_prep_dma_cyclic(struct dma_chan *chan, dma_addr_t buf, size_t len,
 			  size_t period_len, enum dma_transfer_direction dir,
-			  unsigned long flags, void *context)
+			  unsigned long flags)
 {
 	struct sun4i_dma_vchan *vchan = to_sun4i_dma_vchan(chan);
 	struct dma_slave_config *sconfig = &vchan->cfg;
@@ -985,9 +985,11 @@ static irqreturn_t sun4i_dma_interrupt(int irq, void *dev_id)
 	struct sun4i_dma_contract *contract;
 	struct sun4i_dma_promise *promise;
 	unsigned long pendirq, irqs, disableirqs = 0;
-	int bit, ret = IRQ_HANDLED;
+	int bit, i, free_room = 0, allow_mitigation = 1;
 
 	pendirq = readl_relaxed(priv->base + DMA_IRQ_PENDING_STATUS_REG);
+
+handle_pending:
 
 	for_each_set_bit(bit, &pendirq, 32) {
 		pchan = &pchans[bit >> 1];
@@ -1028,10 +1030,10 @@ static irqreturn_t sun4i_dma_interrupt(int irq, void *dev_id)
 				vchan->processing = promise;
 				vchan_cyclic_callback(&contract->vd);
 			} else {
-				ret = IRQ_WAKE_THREAD;
 				vchan->processing = NULL;
 				vchan->pchan = NULL;
 
+				free_room = 1;
 				disableirqs |= BIT(bit);
 				release_pchan(priv, pchan);
 			}
@@ -1055,21 +1057,29 @@ static irqreturn_t sun4i_dma_interrupt(int irq, void *dev_id)
 	/* Writing 1 to the pending field will clear the pending interrupt */
 	writel_relaxed(pendirq, priv->base + DMA_IRQ_PENDING_STATUS_REG);
 
-	return ret;
-}
+	/*
+	 * If a pchan was freed, we may be able to schedule something else,
+	 * so have a look around
+	 */
+	if (free_room) {
+		for (i = 0; i < DMA_NR_MAX_VCHANS; i++) {
+			vchan = &priv->vchans[i];
+			spin_lock(&vchan->vc.lock);
+			__execute_vchan_pending(priv, vchan);
+			spin_unlock(&vchan->vc.lock);
+		}
+	}
 
-static irqreturn_t sun4i_dma_submit_work(int irq, void *dev_id)
-{
-	struct sun4i_dma_dev *priv = dev_id;
-	struct sun4i_dma_vchan *vchan;
-	unsigned long flags;
-	int i;
-
-	for (i = 0; i < DMA_NR_MAX_VCHANS; i++) {
-		vchan = &priv->vchans[i];
-		spin_lock_irqsave(&vchan->vc.lock, flags);
-		__execute_vchan_pending(priv, vchan);
-		spin_unlock_irqrestore(&vchan->vc.lock, flags);
+	/*
+	 * Handle newer interrupts if some showed up, but only do it once
+	 * to avoid a too long a loop
+	 */
+	if (allow_mitigation) {
+		pendirq = readl_relaxed(priv->base + DMA_IRQ_PENDING_STATUS_REG);
+		if (pendirq) {
+			allow_mitigation = 0;
+			goto handle_pending;
+		}
 	}
 
 	return IRQ_HANDLED;
@@ -1178,10 +1188,8 @@ static int sun4i_dma_probe(struct platform_device *pdev)
 		return ret;
 	}
 
-	ret = devm_request_threaded_irq(&pdev->dev, priv->irq,
-					sun4i_dma_interrupt,
-					sun4i_dma_submit_work,
-					0, dev_name(&pdev->dev), priv);
+	ret = devm_request_irq(&pdev->dev, priv->irq, sun4i_dma_interrupt,
+			       0, dev_name(&pdev->dev), priv);
 	if (ret) {
 		dev_err(&pdev->dev, "Cannot request IRQ\n");
 		goto err_clk_disable;
