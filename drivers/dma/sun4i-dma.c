@@ -984,12 +984,15 @@ static irqreturn_t sun4i_dma_interrupt(int irq, void *dev_id)
 	struct sun4i_dma_vchan *vchan;
 	struct sun4i_dma_contract *contract;
 	struct sun4i_dma_promise *promise;
-	unsigned long pendirq, irqs, disableirqs = 0;
-	int bit, i, free_room = 0, allow_mitigation = 1;
+	unsigned long pendirq, irqs, disableirqs;
+	int bit, i, free_room, allow_mitigation = 1;
 
 	pendirq = readl_relaxed(priv->base + DMA_IRQ_PENDING_STATUS_REG);
 
 handle_pending:
+
+	disableirqs = 0;
+	free_room = 0;
 
 	for_each_set_bit(bit, &pendirq, 32) {
 		pchan = &pchans[bit >> 1];
