@@ -1190,6 +1190,13 @@ static int sun4i_dma_probe(struct platform_device *pdev)
 		return ret;
 	}
 
+	/*
+	 * Make sure the IRQs are all disabled and accounted for. The bootloader
+	 * likes to leave these dirty
+	 */
+	writel(0, priv->base + DMA_IRQ_ENABLE_REG);
+	writel(0xFFFFFFFF, priv->base + DMA_IRQ_PENDING_STATUS_REG);
+
 	ret = devm_request_irq(&pdev->dev, priv->irq, sun4i_dma_interrupt,
 			       0, dev_name(&pdev->dev), priv);
 	if (ret) {
