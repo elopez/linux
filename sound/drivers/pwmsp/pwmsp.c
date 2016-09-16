@@ -40,11 +40,7 @@ struct snd_pwmsp pwmsp_chip;
 static int snd_pwmsp_create(struct snd_card *card)
 {
 	static struct snd_device_ops ops = { };
-	struct timespec tp;
 	int err;
-
-	hrtimer_get_res(CLOCK_MONOTONIC, &tp);
-	pr_info("PCSP: Timer resolution is (%linS)\n", tp.tv_nsec);
 
 	spin_lock_init(&pwmsp_chip.substream_lock);
 	atomic_set(&pwmsp_chip.timer_active, 0);
