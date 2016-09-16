@@ -49,6 +49,7 @@
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/interrupt-controller/irq.h>
 #include <dt-bindings/pinctrl/sun4i-a10.h>
+#include <dt-bindings/pwm/pwm.h>
 
 / {
 	model = "Cubietech Cubietruck";
@@ -111,6 +112,11 @@
 	spdif_out: spdif-out {
 		#sound-dai-cells = <0>;
 		compatible = "linux,spdif-dit";
+	};
+
+	pcspkr {
+		compatible = "snd-pwmsp";
+		pwms = <&pwm 0 50 0>;
 	};
 };
 
