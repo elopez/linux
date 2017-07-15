@@ -1,4 +1,5 @@
-sudo: false
+dist: trusty
+sudo: required
 language: c
 
 addons:
@@ -8,13 +9,19 @@ addons:
     - gcc-arm-linux-gnueabihf
     - u-boot-tools
     - llvm-3.4-dev
+  sonarcloud:
+    organization: "elopez-github"
+    token:
+      secure: "TkWqFuUiXsySj6MoqvTXeBSS3YPvu6Kj9qSjEU5QDULp4XtEizTLNSS66CmYdPNo8Wo+IOegMibWxU/XzFgQnCBUvMKmxNrZuPvHgNf65ygXyR91mPxnAzjOzvWvIwl/Gu/5fSZHpGVMRwYr3dj8/7CR9kNiNKYL8K0K06WO0Rg="
+    branches:
+      - .*
 
 compiler:
   - gcc
 
 env:
   - ARCH=arm LOADADDR=0x40008000 CROSS_COMPILE="arm-linux-gnueabihf-" BUILD_CONFIG=sunxi_defconfig TARGETS="uImage dtbs" J=1 C=2
-  - ARCH=arm LOADADDR=0x40008000 CROSS_COMPILE="arm-linux-gnueabihf-" BUILD_CONFIG=multi_v7_defconfig TARGETS="uImage dtbs modules" J=1 C=2
+  - ARCH=arm LOADADDR=0x40008000 CROSS_COMPILE="arm-linux-gnueabihf-" BUILD_CONFIG=multi_v7_defconfig TARGETS="uImage dtbs modules" J=1 C=2 SONAR=1
   - BUILD_CONFIG=allyesconfig TARGETS="bzImage" J=8 C=0
   - BUILD_CONFIG=allnoconfig TARGETS="bzImage" J=8 C=0
   - BUILD_CONFIG=allmodconfig TARGETS="bzImage modules" J=8 C=0
@@ -28,7 +35,12 @@ before_script:
   - make $BUILD_CONFIG
 
 script:
-  - make -j$J C=$C CONFIG_DEBUG_SECTION_MISMATCH=y $TARGETS
+  - build-wrapper-linux-x86-64 --out-dir bw-output make -j$J C=$C CONFIG_DEBUG_SECTION_MISMATCH=y $TARGETS
+  - sh -c '[ "$SONAR" = "1" ] && sonar-scanner || exit 0'
+
+cache:
+  directories:
+    - '$HOME/.sonar/cache'
 
 notifications:
   email:
